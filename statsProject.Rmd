@@ -40,11 +40,15 @@ summary(cleaned_data)
 >
 
 
-**Visualizations: (I will do this -Andre)**
+**Visualizations: **
 
-Quantitative
 
->r code here
+
+```{r}
+model1 <- lm(weekly_hours_viewed ~ runtime + category + cumulative_top10, cleaned_data)
+summary(model1)
+```
+
 
 Qualitative
 
