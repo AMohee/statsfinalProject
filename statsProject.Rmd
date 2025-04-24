@@ -25,13 +25,18 @@ globalViewership <- read_csv("all-weeks-global.csv") %>%
   filter(grepl('2022', week)) %>% 
   group_by(show_title, category) %>% 
   summarise(weekly_hours_viewed = sum(weekly_hours_viewed), 
-            cumulative_top10 = sum(cumulative_weeks_in_top_10)) 
-%>% 
+            cumulative_top10 = sum(cumulative_weeks_in_top_10)) %>% 
   mutate(weekly_hours_viewed = weekly_hours_viewed/10000)
 
 cleaned_data <- globalViewership %>% 
   inner_join(movieTitles, by = "show_title")
  
+
+cleaned_data <- cleaned_data %>%
+  mutate(genre1=gsub(",.*","]",genres), 
+         filteredproduction_countries=gsub(",.*","]",production_countries)) %>% 
+  select(-genres, -production_countries) %>%
+  filter(cumulative_top10 < 100)
 
 # Introduction (Table 1)
 summary(cleaned_data)
@@ -44,14 +49,17 @@ summary(cleaned_data)
 
 **Visualizations: **
 
-
-
 ```{r}
-model1 <- lm(weekly_hours_viewed ~ runtime + category + cumulative_top10, cleaned_data)
+model1 <- lm(weekly_hours_viewed ~ runtime + category + cumulative_top10 + genre1, cleaned_data)
 summary(model1)
 
 coef(model1)
+
+model2 <- lm(weekly_hours_viewed ~ cumulative_top10 + filteredproduction_countries, cleaned_data)
+summary(model2)
 ```
+
+
 # Weekly Hour vs. Cumulative_Top 10
 ```{r}
 ggplot(cleaned_data, aes(x = cumulative_top10, y = weekly_hours_viewed, color = category)) +
@@ -59,19 +67,25 @@ ggplot(cleaned_data, aes(x = cumulative_top10, y = weekly_hours_viewed, color = 
   theme_bw()
   
 ```
+
 ```{r}
 ggplot(cleaned_data, aes(x = runtime, category)) +
   geom_boxplot() +
   theme_bw()
 ```
+
 ```{r}
-ggplot(cleaned_data, aes(x = tmdb_score, y = imdb_votes)) +
+ggplot(cleaned_data, aes(x = tmdb_popularity, weekly_hours_viewed, color = genre1)) +
   geom_point() +
   geom_smooth(se = FALSE)
   theme_bw()
 ```
 
-
+```{r}
+ggplot(cleaned_data, aes(x = genre1)) +
+  geom_bar()
+```
+the shows that usually end up ion the top 10 are biased towards shows and films that are under the drama category.
 
 
 **Our Structure for the project paper:**
