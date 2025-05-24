@@ -1,17 +1,26 @@
 ---
-title: "statsProject"
-Names: Andre Mojica, Nadezhda Dominguez Salinas, Yeshe Jangchup, Ramatoulaye Bah
-output: html_document
+title: "Stats 155 Final Project, Popularity of Netflix Films Based on Viewership
+"
+author: "Andre Mojica, Nadezhda Dominguez Salinas, Yeshe Jangchup, Ramatoulaye Bah"
+format: html
+editor: visual
 ---
 
-Libraries:
+## Libraries:
 
 ```{r}
+#| message: false
+
 library(tidyverse)
 library(ggplot2)
 ```
 
+## Data Cleaning:
+
 ```{r}
+#| results: 'hide'
+#| message: false
+
 #The runtime of the shows listed is in minutes and represents how long on average ONE episode of the show is/how long the movie is.
 
 # Original Data from Kaggle and removed variables not interested in. Using select().
@@ -54,20 +63,28 @@ filtered_data <- cleaned_data %>%
 summary(filtered_data)
 ```
 
-**Visualizations:**
+## Visualizations:
 
 > Boxplot that shows the runtime of each type of media (category).
 
 ```{r}
+#| results: 'hide'
+#| message: false
+
 ggplot(cleaned_data, aes(x = runtime, category)) +
   geom_boxplot() +
-  labs(title = "Runtime of shows based on the media type")
+  labs(title = "Runtime of shows based on the media type",
+       x = "Media Runtime (Minutes)",
+       y = "Media Category") +
   theme_bw()
 ```
 
 > Scatterplot that addresses our main predictor of interest. Total hours viewed of a Netlfix title predicted by its runtime.
 
 ```{r}
+#| results: 'hide'
+#| message: false
+
 ggplot(filtered_data, aes(x = runtime, y = total_views)) +
   geom_point() +
   labs(title = "Total Views on Media vs Runtime", 
@@ -75,17 +92,25 @@ ggplot(filtered_data, aes(x = runtime, y = total_views)) +
        y = "Total Hours Viewed (in 10000 Hours)") +
   theme_bw()
 ```
+
 > Barplot that shows how many Netlfix titles in the top 10 that have are of a certain genre. This was filtered to only display the genres with 10 or more observations.
 
 ```{r}
+#| results: 'hide'
+#| message: false
+
 ggplot(filtered_data, aes(x = genre1)) +
   geom_bar() +
   labs(title = "Number of Shows per Genre", x = "Title Genre") +
   theme_bw()
 ```
+
 > Both visualizations below show the total hours viewed predicted by TMDB scores and IMDB scores (two different rating scores that do the same thing).
 
 ```{r}
+#| results: 'hide'
+#| message: false
+
 ggplot(cleaned_data, aes(x = tmdb_score, y = total_views, color = category)) +
   geom_point(alpha = 0.6) +
   geom_smooth(method = "lm", se = FALSE) +
@@ -96,6 +121,9 @@ ggplot(cleaned_data, aes(x = tmdb_score, y = total_views, color = category)) +
 ```
 
 ```{r}
+#| results: 'hide'
+#| message: false
+
 cleaned_data %>%
   ggplot(aes(x = imdb_score, y = total_views, color = category)) +
   geom_point(alpha = 0.6) +
@@ -106,20 +134,21 @@ cleaned_data %>%
   theme_bw()
 
 ```
-> Model Testing 
+
+## Model Testing:
 
 ```{r}
+#| message: false
+
 # Testing different predictors for the total hours viewed.
 model1 <- lm(total_views ~ runtime, filtered_data)
 model2 <- lm(total_views ~ runtime + cumulative_top10, filtered_data)
-model3 <- lm(total_views ~ genre1 + filteredproduction_countries, filtered_data2)
-model4 <- lm(total_views ~ imdb_score + tmdb_score, filtered_data)
+model3 <- lm(total_views ~ imdb_score + tmdb_score, filtered_data)
 
 # The summaries for each testing model, this is where we dictate whether or not these are good predictors. 
 summary(model1)
 summary(model2)
 summary(model3)
-summary(model4)
 
 # The final model that best illustrates our research question, and our data explorations.
 model_main <- lm(total_views ~ runtime + category + genre1 + cumulative_top10, filtered_data)
@@ -127,11 +156,15 @@ summary(model_main)
 ```
 
 ```{r}
+#| message: false
+
 # Test to compare our main model statement with a nested model that has only runtime and cumulative_top10 as predictors.
 anova(model2, model_main)
 ```
 
 ```{r}
+#| message: false
+
 # Getting the coefficients of our main model statement.
 coef(model_main)
 ```
